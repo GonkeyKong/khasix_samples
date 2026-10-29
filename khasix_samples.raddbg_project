@@ -3,7 +3,19 @@
 target:
 {
   executable: "bin/sample_platform.exe"
-  working_directory: "bin/"
-  enabled: 1
+  working_directory: bin
+  enabled: 0
   label: Platform
+}
+target:
+{
+  executable: "bin/sample_basic_renderer.exe"
+  working_directory: bin
+  enabled: 1
+  label: Basic Renderer
+}
+debug_info:
+{
+  path: "E:/khasix_samples/bin/sample_basic_renderer.pdb"
+  timestamp: 66229675654842
 }
