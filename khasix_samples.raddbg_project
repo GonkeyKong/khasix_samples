@@ -1,0 +1,9 @@
+// raddbg 0.9.25 project file
+
+target:
+{
+  executable: "bin/sample_platform.exe"
+  working_directory: "bin/"
+  enabled: 1
+  label: Platform
+}

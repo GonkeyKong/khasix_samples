@@ -1,0 +1,3 @@
+[submodule "khasix"]
+	path = khasix
+	url = git@github.com:GonkeyKong/khasix.git
