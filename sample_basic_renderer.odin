@@ -10,10 +10,13 @@ ASSETS_PATH :: ROOT_PATH + "/assets"
 TEXTURES_PATH :: ASSETS_PATH + "/textures"
 
 Scene_Info :: struct {
+  target: renderer.Target,
+  init:   proc() -> bool,
   render: proc(),
 }
 
 Scene :: enum {
+  Targets,
   Basic_Quads,
   Quads_Batched,
 }
@@ -23,12 +26,15 @@ Game_State :: struct {
   renderer_state: renderer.State,
 
   current_scene:  Scene,
+  draw_commands:  renderer.Draw_Commands,
 
   texture_emerald_peaks:                 renderer.Texture_Handle,
   texture_art_deco_gatsby:               renderer.Texture_Handle,
   texture_cornwall_toned_wood_flooring:  renderer.Texture_Handle,
   texture_nero_flooring_tiles:           renderer.Texture_Handle,
   texture_yale_blue_mosaic_wooden_floor: renderer.Texture_Handle,
+
+  scene_target_extra_target: renderer.Target,
 
   // Utility for scenes that want to grab a random texture
   all_textures: [dynamic]renderer.Texture_Handle,
@@ -61,10 +67,20 @@ main :: proc() {
     return
   }
 
+  for &scene in scenes {
+    if !renderer.target_init(&scene.target, platform.window_client_size()) {
+      return
+    }
+    scene.init()
+  }
+
+  renderer.draw_commands_init(&game.draw_commands)
+
   for !platform.window_should_close() {
     platform.update()
 
     renderer.new_frame(platform.window_client_size())
+    renderer.draw_commands_clear(&game.draw_commands)
 
     if platform.button_pressed(.Arrow_Left) {
       i := cast(int)game.current_scene - 1
@@ -83,7 +99,8 @@ main :: proc() {
 
     scenes[game.current_scene].render()
 
-    if !renderer.end_frame_and_present() {
+    renderer.draw_commands_submit(&game.draw_commands, scenes[game.current_scene].target)
+    if !renderer.end_frame_and_present(scenes[game.current_scene].target) {
       break
     }
 
@@ -96,7 +113,7 @@ scene_render_basic_quads :: proc() {
 
 load_textures :: proc() -> bool {
   texture_create :: proc(filepath: string) -> (handle: renderer.Texture_Handle, ok: bool) {
-    handle = renderer.texture_create(filepath) or_return
+    handle = renderer.texture_create_color(filepath, flags = {}) or_return
     append(&game.all_textures, handle)
     return handle, true
   }
@@ -113,8 +130,13 @@ load_textures :: proc() -> bool {
 scenes := [Scene]Scene_Info {
 
   .Basic_Quads = {
+    init = proc() -> bool {
+      return true
+    },
+
     render = proc() {
       renderer.render_quad(
+        &game.draw_commands,
         min = { 20, 20 },
         max = { 500, 300 },
         tint = {1, 1, 1, 1},
@@ -122,12 +144,14 @@ scenes := [Scene]Scene_Info {
         texture_handle = game.texture_emerald_peaks,
       )
       renderer.render_quad(
+        &game.draw_commands,
         min = { 600, 600 },
         max = { 800, 800 },
         tint = {1, 1, 1, 1},
         depth = 0.2,
       )
       renderer.render_quad(
+        &game.draw_commands,
         min = { 20, 20 },
         max = { 100, 100 },
         tint = { 0, 1, 0, 1 },
@@ -137,6 +161,10 @@ scenes := [Scene]Scene_Info {
   },
 
   .Quads_Batched = {
+    init = proc() -> bool {
+      return true
+    },
+
     render = proc() {
 
       draw_lots_of_quads :: proc(
@@ -162,6 +190,7 @@ scenes := [Scene]Scene_Info {
           }
 
           renderer.render_quad(
+            &game.draw_commands,
             min = pos,
             max = pos + quad_size,
             tint = color,
@@ -213,6 +242,42 @@ scenes := [Scene]Scene_Info {
       renderer.stats_fill(&stats)
       fmt.println(stats)
     }
+  },
+
+  .Targets = {
+    init = proc() -> bool {
+    if !renderer.target_init(&game.scene_target_extra_target, {200, 200}) {
+      return true
+    }
+      
+      return true
+    },
+
+    render = proc() {
+
+      {
+        temp_draw_commands: renderer.Draw_Commands
+        renderer.draw_commands_init(&temp_draw_commands, context.temp_allocator)
+
+        renderer.render_quad(
+          &temp_draw_commands,
+          min = { 100, 100 },
+          max = { 200, 200 },
+          tint = ORANGE,
+        )
+
+        renderer.draw_commands_submit(&temp_draw_commands, game.scene_target_extra_target)
+      }
+
+      renderer.render_quad(
+        &game.draw_commands,
+        min = { 0, 0},
+        max = ([2]f32)(scenes[.Targets].target.size),
+        tint = WHITE,
+        texture_handle = game.scene_target_extra_target.target,
+      )
+
+    },
   },
 }
 

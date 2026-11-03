@@ -1,12 +1,12 @@
 // raddbg 0.9.25 project file
 
 recent_file: path: "khasix/basic_renderer/basic_renderer_d3d11.odin"
-recent_file: path: "sample_basic_renderer.odin"
 recent_file: path: "khasix/basic_renderer/basic_renderer.odin"
+recent_file: path: "sample_basic_renderer.odin"
+recent_file: path: "D:/a/_work/1/s/src/vctools/crt/vcruntime/src/string/amd64/memset.asm"
 recent_file: path: "C:/Program Files/odin/base/runtime/core.odin"
 recent_file: path: "C:/Program Files/odin/base/runtime/internal.odin"
 recent_file: path: "khasix/game_platform/game_platform.odin"
-recent_file: path: "D:/a/_work/1/s/src/vctools/crt/vcruntime/src/string/amd64/memset.asm"
 recent_file: path: "khasix/game_platform/game_platform_windows.odin"
 recent_file: path: "sample_platform.odin"
 target:
@@ -19,7 +19,7 @@ target:
 debug_info:
 {
   path: "E:/khasix_samples/bin/sample_basic_renderer.pdb"
-  timestamp: 66230044103372
+  timestamp: 66230095358475
 }
 target:
 {
