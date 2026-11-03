@@ -1,21 +1,263 @@
 package sample_basic_renderer
 
-import platform "khasix:game_platform"
+import platform  "khasix:game_platform"
+import renderer  "khasix:basic_renderer"
 import "core:log"
+import "core:fmt"
+
+ROOT_PATH :: #config(SAMPLES_ROOT_PATH, "..")
+ASSETS_PATH :: ROOT_PATH + "/assets"
+TEXTURES_PATH :: ASSETS_PATH + "/textures"
+
+Scene_Info :: struct {
+  render: proc(),
+}
+
+Scene :: enum {
+  Basic_Quads,
+  Quads_Batched,
+}
+
+Game_State :: struct {
+  platform_state: platform.State,
+  renderer_state: renderer.State,
+
+  current_scene:  Scene,
+
+  texture_emerald_peaks:                 renderer.Texture_Handle,
+  texture_art_deco_gatsby:               renderer.Texture_Handle,
+  texture_cornwall_toned_wood_flooring:  renderer.Texture_Handle,
+  texture_nero_flooring_tiles:           renderer.Texture_Handle,
+  texture_yale_blue_mosaic_wooden_floor: renderer.Texture_Handle,
+
+  // Utility for scenes that want to grab a random texture
+  all_textures: [dynamic]renderer.Texture_Handle,
+}
+
+game: ^Game_State
 
 main :: proc() {
   logger := log.create_console_logger()
   defer log.destroy_console_logger(logger)
   context.logger = logger
 
-  platform_state := new(platform.State)
-  defer platform.shutdown(platform_state)
-  if !platform.init(platform_state, "Basic Renderer Sample", {1920, 1080}) {
+  game = new(Game_State, context.allocator)
+  defer free(game, context.allocator)
+
+  defer platform.shutdown(&game.platform_state)
+  if !platform.init(&game.platform_state, "Basic Renderer Sample", {1920, 1080}) {
+    return
+  }
+
+  defer renderer.shutdown(&game.renderer_state)
+  if !renderer.init(
+    &game.renderer_state,
+    platform.window_native_handle(),
+  ) {
+    return
+  }
+
+  if !load_textures() {
     return
   }
 
   for !platform.window_should_close() {
     platform.update()
 
+    renderer.new_frame(platform.window_client_size())
+
+    if platform.button_pressed(.Arrow_Left) {
+      i := cast(int)game.current_scene - 1
+      if i < 0 {
+        i = cast(int)max(Scene)
+      }
+      game.current_scene = cast(Scene)i
+    }
+    if platform.button_pressed(.Arrow_Right) {
+      i := cast(int)game.current_scene + 1
+      if i > cast(int)max(Scene) {
+        i = cast(int)min(Scene)
+      }
+      game.current_scene = cast(Scene)i
+    }
+
+    scenes[game.current_scene].render()
+
+    if !renderer.end_frame_and_present() {
+      break
+    }
+
   }
+}
+
+scene_render_basic_quads :: proc() {
+
+}
+
+load_textures :: proc() -> bool {
+  texture_create :: proc(filepath: string) -> (handle: renderer.Texture_Handle, ok: bool) {
+    handle = renderer.texture_create(filepath) or_return
+    append(&game.all_textures, handle)
+    return handle, true
+  }
+
+  game.texture_emerald_peaks = texture_create(TEXTURES_PATH + "/emerald_peaks.png") or_return
+  game.texture_art_deco_gatsby = texture_create(TEXTURES_PATH + "/art_deco_gatsby.png") or_return
+  game.texture_cornwall_toned_wood_flooring = texture_create(TEXTURES_PATH + "/cornwall_toned_wood_flooring.png") or_return
+  game.texture_nero_flooring_tiles = texture_create(TEXTURES_PATH + "/nero_flooring_tiles.png") or_return
+  game.texture_yale_blue_mosaic_wooden_floor = texture_create(TEXTURES_PATH + "/yale_blue_mosaic_wooden_floor.png") or_return
+
+  return true
+}
+
+scenes := [Scene]Scene_Info {
+
+  .Basic_Quads = {
+    render = proc() {
+      renderer.render_quad(
+        min = { 20, 20 },
+        max = { 500, 300 },
+        tint = {1, 1, 1, 1},
+        depth = 0.1,
+        texture_handle = game.texture_emerald_peaks,
+      )
+      renderer.render_quad(
+        min = { 600, 600 },
+        max = { 800, 800 },
+        tint = {1, 1, 1, 1},
+        depth = 0.2,
+      )
+      renderer.render_quad(
+        min = { 20, 20 },
+        max = { 100, 100 },
+        tint = { 0, 1, 0, 1 },
+        depth = 0.0,
+      )
+    }
+  },
+
+  .Quads_Batched = {
+    render = proc() {
+
+      draw_lots_of_quads :: proc(
+        count: int,
+        start_pos: [2]f32,
+        colored := false,
+        textured := false,
+        quad_size := [2]f32 { 100, 100 },
+        scissor := renderer.Scissor{},
+      ) {
+        pos := start_pos
+        offset := quad_size / 3
+        for i in 0 ..< count {
+
+          color := WHITE
+          if colored {
+            color = COLORS[i % len(COLORS)]
+          }
+
+          texture: renderer.Texture_Handle
+          if textured {
+            texture = game.all_textures[i % len(game.all_textures)]
+          }
+
+          renderer.render_quad(
+            min = pos,
+            max = pos + quad_size,
+            tint = color,
+            texture_handle = texture,
+            depth = cast(f32)i / cast(f32)count,
+            scissor = scissor,
+          )
+
+          pos += offset
+        }
+      }
+
+      // Colored quads
+      draw_lots_of_quads(10, { 20, 20 }, textured = true, quad_size = { 200, 200 })
+      draw_lots_of_quads(20, { 400, 20 }, colored = true)
+      draw_lots_of_quads(10, { 520, 20  }, textured = true)
+
+      draw_lots_of_quads(100, { 20, 20 }, quad_size = { 20, 20 })
+      draw_lots_of_quads(100, { 250, 20 }, colored = true, quad_size = { 20, 20 })
+      draw_lots_of_quads(100, { 480, 20 }, textured = true, quad_size = { 20, 20 })
+
+      draw_lots_of_quads(100, { 20, 180 }, textured = true, quad_size = { 30, 30 })
+      draw_lots_of_quads(200, { 400, 180 }, textured = true, colored = true, quad_size = { 15, 15 })
+      draw_lots_of_quads(200, { 20, 350 }, colored = true, quad_size = { 15, 15 })
+
+      draw_lots_of_quads(100, { 400, 350 }, colored = true, textured = true, quad_size = { 20, 20 })
+      draw_lots_of_quads(50, { 700, 20 }, colored = true, quad_size = { 100, 100 })
+      draw_lots_of_quads(500, { 20, 550 }, quad_size = { 5, 5 })
+      draw_lots_of_quads(1000, { 400, 550 }, colored = true, quad_size = { 5, 5 })
+
+      scissor_a := renderer.Scissor{
+        min = { 20, 350 },
+        max = { 250, 550 },
+      }
+      scissor_b := renderer.Scissor{
+        min = { 200, 200 },
+        max = { 400, 400 },
+      }
+
+      draw_lots_of_quads(50, { 20, 350 }, colored = true, scissor = scissor_a)
+      draw_lots_of_quads(50, { 270, 350 }, colored = true, scissor = scissor_b)
+      draw_lots_of_quads(20, { 520, 350 }, scissor = scissor_a)
+      draw_lots_of_quads(20, { 520, 350 }, scissor = scissor_b)
+      draw_lots_of_quads(20, { 520, 350 }, scissor = scissor_a)
+      draw_lots_of_quads(20, { 520, 350 }, scissor = scissor_b)
+
+      // print stats
+      stats: renderer.Stats
+      renderer.stats_fill(&stats)
+      fmt.println(stats)
+    }
+  },
+}
+
+RED :: [4]f32 { 1, 0, 0, 1 }
+ORANGE :: [4]f32 { 1, 0.5, 0, 1 }
+YELLOW :: [4]f32 { 1, 1, 0, 1 }
+GREEN :: [4]f32 { 0, 1, 0, 1 }
+BLUE :: [4]f32 { 0, 0, 1, 1 }
+PURPLE :: [4]f32 { 0.5, 0, 0.5, 1 }
+PINK :: [4]f32 { 1, 0.4, 0.7, 1 }
+CYAN :: [4]f32 { 0, 1, 1, 1 }
+MAGENTA :: [4]f32 { 1, 0, 1, 1 }
+WHITE :: [4]f32 { 1, 1, 1, 1 }
+BLACK :: [4]f32 { 0, 0, 0, 1 }
+GRAY :: [4]f32 { 0.5, 0.5, 0.5, 1 }
+BROWN :: [4]f32 { 0.6, 0.3, 0.1, 1 }
+LIME :: [4]f32 { 0.5, 1, 0, 1 }
+TEAL :: [4]f32 { 0, 0.5, 0.5, 1 }
+NAVY :: [4]f32 { 0, 0, 0.5, 1 }
+MAROON :: [4]f32 { 0.5, 0, 0, 1 }
+GOLD :: [4]f32 { 1, 0.84, 0, 1 }
+CORAL :: [4]f32 { 1, 0.5, 0.31, 1 }
+TURQUOISE :: [4]f32 { 0.25, 0.88, 0.82, 1 }
+INDIGO :: [4]f32 { 0.29, 0, 0.51, 1 }
+
+COLORS := [][4]f32 {
+    RED,
+    ORANGE,
+    YELLOW,
+    GREEN,
+    BLUE,
+    PURPLE,
+    PINK,
+    CYAN,
+    MAGENTA,
+    WHITE,
+    BLACK,
+    GRAY,
+    BROWN,
+    LIME,
+    TEAL,
+    NAVY,
+    MAROON,
+    GOLD,
+    CORAL,
+    TURQUOISE,
+    INDIGO,
 }

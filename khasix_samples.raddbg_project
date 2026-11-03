@@ -1,5 +1,26 @@
 // raddbg 0.9.25 project file
 
+recent_file: path: "khasix/basic_renderer/basic_renderer_d3d11.odin"
+recent_file: path: "sample_basic_renderer.odin"
+recent_file: path: "khasix/basic_renderer/basic_renderer.odin"
+recent_file: path: "C:/Program Files/odin/base/runtime/core.odin"
+recent_file: path: "C:/Program Files/odin/base/runtime/internal.odin"
+recent_file: path: "khasix/game_platform/game_platform.odin"
+recent_file: path: "D:/a/_work/1/s/src/vctools/crt/vcruntime/src/string/amd64/memset.asm"
+recent_file: path: "khasix/game_platform/game_platform_windows.odin"
+recent_file: path: "sample_platform.odin"
+target:
+{
+  executable: "bin/sample_basic_renderer.exe"
+  working_directory: bin
+  label: "Basic Renderer"
+  enabled: 1
+}
+debug_info:
+{
+  path: "E:/khasix_samples/bin/sample_basic_renderer.pdb"
+  timestamp: 66230044103372
+}
 target:
 {
   executable: "bin/sample_platform.exe"
@@ -7,15 +28,8 @@ target:
   enabled: 0
   label: Platform
 }
-target:
-{
-  executable: "bin/sample_basic_renderer.exe"
-  working_directory: bin
-  enabled: 1
-  label: Basic Renderer
-}
 debug_info:
 {
-  path: "E:/khasix_samples/bin/sample_basic_renderer.pdb"
-  timestamp: 66229675654842
+  path: "E:/khasix_samples/bin/sample_platform.pdb"
+  timestamp: 66229753031286
 }

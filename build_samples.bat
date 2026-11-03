@@ -22,7 +22,7 @@ if not exist %sample% (
 
 pushd %bin_dir%
 
-set cc=odin build %sample% -file -debug -collection:khasix=%khasix_src_dir%
+set cc=odin build %sample% -file -debug -collection:khasix=%khasix_src_dir% -define:SAMPLES_ROOT_PATH=".."
 echo %cc%
 %cc%
 
