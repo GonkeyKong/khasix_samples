@@ -289,9 +289,28 @@ scenes := [Scene]Scene_Info {
     render = proc() {
 
       renderer.debug_render_line(&game.draw_commands,
-        { 100, 100 }, { 200, 200 }, RED)
-      renderer.debug_render_line(&game.draw_commands,
         { 700, 100 }, { 200, 700 }, ORANGE)
+      renderer.debug_render_arrow(&game.draw_commands,
+        { 50, 500 }, { 700, 900 }, ORANGE)
+
+      renderer.debug_render_arrow(&game.draw_commands,
+        { 100, 100 }, { 500, 100 }, RED);
+      renderer.debug_render_arrow(&game.draw_commands,
+        { 500, 200 }, { 100, 200 }, BLUE);
+      renderer.debug_render_arrow(&game.draw_commands,
+        { 300, 100 }, { 300, 500 }, GREEN);
+      renderer.debug_render_arrow(&game.draw_commands,
+        { 400, 500 }, { 400, 100 }, YELLOW);
+      renderer.debug_render_arrow(&game.draw_commands,
+        { 100, 500 }, { 400, 200 }, PURPLE);
+      renderer.debug_render_arrow(&game.draw_commands,
+        { 500, 100 }, { 200, 400 }, PINK);
+      renderer.debug_render_arrow(&game.draw_commands,
+        { 600, 600 }, { 650, 650 }, WHITE);
+      renderer.debug_render_arrow(&game.draw_commands,
+        { 50, 700 }, { 900, 300 }, ORANGE);
+      renderer.debug_render_arrow(&game.draw_commands,
+        { 300, 300 }, { 300, 300 }, GRAY);
 
     },
   },
