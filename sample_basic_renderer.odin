@@ -16,6 +16,7 @@ Scene_Info :: struct {
 }
 
 Scene :: enum {
+  Lines,
   Targets,
   Basic_Quads,
   Quads_Batched,
@@ -246,9 +247,9 @@ scenes := [Scene]Scene_Info {
 
   .Targets = {
     init = proc() -> bool {
-    if !renderer.target_init(&game.scene_target_extra_target, {200, 200}) {
-      return true
-    }
+      if !renderer.target_init(&game.scene_target_extra_target, {200, 200}) {
+        return true
+      }
       
       return true
     },
@@ -276,6 +277,21 @@ scenes := [Scene]Scene_Info {
         tint = WHITE,
         texture_handle = game.scene_target_extra_target.target,
       )
+
+    },
+  },
+
+  .Lines = {
+    init = proc() -> bool {
+      return true
+    },
+
+    render = proc() {
+
+      renderer.debug_render_line(&game.draw_commands,
+        { 100, 100 }, { 200, 200 }, RED)
+      renderer.debug_render_line(&game.draw_commands,
+        { 700, 100 }, { 200, 700 }, ORANGE)
 
     },
   },
