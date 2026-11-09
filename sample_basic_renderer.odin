@@ -41,6 +41,9 @@ Game_State :: struct {
 
   // Utility for scenes that want to grab a random texture
   all_textures: [dynamic]renderer.Texture_Handle,
+
+  // Meshes
+  rsm_weird_shapes: renderer.Static_Mesh,
 }
 
 game: ^Game_State
@@ -76,6 +79,7 @@ main :: proc() {
       &sm, STATIC_MESHES_PATH + "/weird_shapes.khsm",
       context.temp_allocator, context.temp_allocator)
     assert(ok)
+    game.rsm_weird_shapes, ok = renderer.static_mesh_create(&sm)
   }
 
   for &scene in scenes {
