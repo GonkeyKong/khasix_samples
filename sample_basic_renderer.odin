@@ -2,12 +2,14 @@ package sample_basic_renderer
 
 import platform  "khasix:game_platform"
 import renderer  "khasix:basic_renderer"
+import assets    "khasix:assets"
 import "core:log"
 import "core:fmt"
 
 ROOT_PATH :: #config(SAMPLES_ROOT_PATH, "..")
 ASSETS_PATH :: ROOT_PATH + "/assets"
 TEXTURES_PATH :: ASSETS_PATH + "/textures"
+STATIC_MESHES_PATH :: ASSETS_PATH + "/static_meshes"
 
 Scene_Info :: struct {
   target: renderer.Target,
@@ -66,6 +68,14 @@ main :: proc() {
 
   if !load_textures() {
     return
+  }
+
+  {
+    sm: assets.Static_Mesh
+    ok := assets.static_mesh_init(
+      &sm, STATIC_MESHES_PATH + "/weird_shapes.khsm",
+      context.temp_allocator, context.temp_allocator)
+    assert(ok)
   }
 
   for &scene in scenes {

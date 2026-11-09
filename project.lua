@@ -2,6 +2,7 @@
 
 -- local sample = "sample_platform.odin"
 local sample = "sample_basic_renderer.odin"
+-- local sample = "sample_serializer.odin"
 
 local build_samples = [[.\build_samples.bat ]]
 local shaders_compile_d3d11 = [[.\khasix\basic_renderer\shaders_compile_d3d11.bat]]
