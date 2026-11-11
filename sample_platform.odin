@@ -17,6 +17,8 @@ main :: proc() {
 	log_mouse_position := false
 
   for !platform.window_should_close() {
+    free_all(context.temp_allocator)
+
     platform.update()
 
     for button in platform.Button {

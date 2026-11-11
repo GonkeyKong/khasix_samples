@@ -5,6 +5,7 @@ import renderer  "khasix:basic_renderer"
 import assets    "khasix:assets"
 import "core:log"
 import "core:fmt"
+import "core:math/linalg"
 
 ROOT_PATH :: #config(SAMPLES_ROOT_PATH, "..")
 ASSETS_PATH :: ROOT_PATH + "/assets"
@@ -18,6 +19,7 @@ Scene_Info :: struct {
 }
 
 Scene :: enum {
+  Meshes,
   Lines,
   Targets,
   Basic_Quads,
@@ -43,6 +45,7 @@ Game_State :: struct {
   all_textures: [dynamic]renderer.Texture_Handle,
 
   // Meshes
+  sm_weird_shapes:  assets.Static_Mesh,
   rsm_weird_shapes: renderer.Static_Mesh,
 }
 
@@ -74,13 +77,13 @@ main :: proc() {
   }
 
   {
-    sm: assets.Static_Mesh
     ok := assets.static_mesh_init(
-      &sm, STATIC_MESHES_PATH + "/weird_shapes.khsm",
-      context.temp_allocator, context.temp_allocator)
+      &game.sm_weird_shapes, STATIC_MESHES_PATH + "/weird_shapes.khsm",
+      context.allocator, context.temp_allocator)
     assert(ok)
-    game.rsm_weird_shapes, ok = renderer.static_mesh_create(&sm)
+    game.rsm_weird_shapes, ok = renderer.static_mesh_create(&game.sm_weird_shapes)
   }
+  defer renderer.static_mesh_destroy(&game.rsm_weird_shapes)
 
   for &scene in scenes {
     if !renderer.target_init(&scene.target, platform.window_client_size()) {
@@ -92,6 +95,8 @@ main :: proc() {
   renderer.draw_commands_init(&game.draw_commands)
 
   for !platform.window_should_close() {
+    free_all(context.temp_allocator)
+
     platform.update()
 
     renderer.new_frame(platform.window_client_size())
@@ -326,6 +331,26 @@ scenes := [Scene]Scene_Info {
       renderer.debug_render_arrow(&game.draw_commands,
         { 300, 300 }, { 300, 300 }, GRAY);
 
+    },
+  },
+
+  .Meshes = {
+    init = proc() -> bool {
+      return true
+    },
+
+    render = proc() {
+      xform := linalg.matrix4_translate_f32({0,0,10})
+      for material_slot in game.sm_weird_shapes.material_slots {
+
+        renderer.render_mesh_slot(
+          &game.draw_commands,
+          &game.rsm_weird_shapes,
+          material_slot,
+          xform,
+          RED,
+        )
+      }
     },
   },
 }

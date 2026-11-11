@@ -1,8 +1,9 @@
 // raddbg 0.9.25 project file
 
-recent_file: path: "sample_basic_renderer.odin"
-recent_file: path: "khasix/basic_renderer/basic_renderer.odin"
+recent_file: path: "D:/a/_work/1/s/src/vctools/crt/vcruntime/src/string/amd64/memcpy.asm"
 recent_file: path: "khasix/basic_renderer/basic_renderer_d3d11.odin"
+recent_file: path: "khasix/basic_renderer/basic_renderer.odin"
+recent_file: path: "sample_basic_renderer.odin"
 recent_file: path: "D:/a/_work/1/s/src/vctools/crt/vcruntime/src/string/amd64/memset.asm"
 recent_file: path: "sample_serializer.odin"
 recent_file: path: "khasix/assets/static_mesh.odin"
@@ -25,7 +26,7 @@ target:
 debug_info:
 {
   path: "E:/khasix_samples/bin/sample_basic_renderer.pdb"
-  timestamp: 66230613299088
+  timestamp: 66230815442651
 }
 target:
 {
@@ -50,9 +51,4 @@ debug_info:
 {
   path: "E:/khasix_samples/bin/sample_serializer.pdb"
   timestamp: 66230609894881
-}
-breakpoint:
-{
-  source_location: "sample_basic_renderer.odin:78:1"
-  hit_count: 1
 }
